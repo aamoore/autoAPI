@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+                  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" 
+                  crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" 
+                integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" 
+                integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" 
+                crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" 
+                integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" 
+                crossorigin="anonymous"></script>
+                
+        <script>
+            $(document).ready(function(){
+                $("input[type=checkbox]").on("click", function() {
+                    $("input[name^='" + $(this).attr('name') + "']").prop('checked', $(this).is(":checked"));
+                })
+            });
+        </script>
+
+        <script>
+            function highlightDuplicateNames() {
+                    var values = $("input[name^='name_']").map(function() { return this.value }).get();
+                    duplicates = values.filter((currentValue, index, arr) => arr.indexOf(currentValue) !== index)
+                    duplicatesPresent = false;
+                    $("input[name^='name_']").each(function() {
+                        if (duplicates.indexOf($(this).val()) !== -1) {
+                            $(this).addClass('duplicate');
+                            duplicatesPresent = true
+                        } else {
+                            $(this).removeClass('duplicate');
+                        } 
+                    });
+                    if (duplicatesPresent) {
+                        $('#warning').removeClass('notDisplayed');
+                        $('#submit').removeClass('displayed');  
+                        $('#submit').addClass('notDisplayed');
+                        $('#warning').addClass('displayed'); 
+                    } else {
+                        $('#submit').removeClass('notDisplayed');
+                        $('#warning').removeClass('displayed');  
+                        $('#warning').addClass('notDisplayed');
+                        $('#submit').addClass('displayed');
+                    }
+            }
+
+            $().ready(function() {
+                highlightDuplicateNames();
+                // fix for newer jQuery versions since you can select by value, but not by current val
+                $('#apiForm').find('input').bind('input',function() {
+                    $(this).attr('value',this.value)
+                });
+                // bind test on any change event
+                $('#apiForm').find('input').on('input',highlightDuplicateNames);
+            });      
+        </script>
+
+        <style>
+            ul { list-style: none }
+            li { margin-bottom: 10px; }
+            .groupNode { font-weight: bold; color: #448 }
+            .leafNode { font-weight: normal }
+            .groupCheckbox { opacity: 0.5 }
+            .leafCheckbox { opacity: 1 }
+            .inputBoxStyle { width: 130px; font-size: 0.7em}
+            .parameterBoxStyle { width: 430px; font-size: 0.7em}
+            .duplicate { background: #fbb; }
+            #apiForm { margin-top: 20px; }
+            body { margin: 20px; }
+            .displayed { display: inline; }
+            .notDisplayed { display: none; }
+            #warning { color: #f44; background: #ffb}
+        </style>
+    </head>
+
+    <body>
+        {{html}}
+    </body>
+
+</html>
