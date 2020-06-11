@@ -38,13 +38,17 @@
                     if (duplicatesPresent) {
                         $('#warning').removeClass('notDisplayed');
                         $('#submit').removeClass('displayed');  
+                        $('#restore').removeClass('displayed');  
                         $('#submit').addClass('notDisplayed');
+                        $('#restore').addClass('notDisplayed');
                         $('#warning').addClass('displayed'); 
                     } else {
                         $('#submit').removeClass('notDisplayed');
+                        $('#restore').removeClass('notDisplayed');
                         $('#warning').removeClass('displayed');  
                         $('#warning').addClass('notDisplayed');
                         $('#submit').addClass('displayed');
+                        $('#restore').addClass('displayed');
                     }
             }
 
@@ -66,14 +70,17 @@
             .leafNode { font-weight: normal }
             .groupCheckbox { opacity: 0.5 }
             .leafCheckbox { opacity: 1 }
-            .inputBoxStyle { width: 130px; font-size: 0.7em}
-            .parameterBoxStyle { width: 430px; font-size: 0.7em}
+            .inputBoxStyle { width: 130px; font-size: 0.7em }
+            .parameterBoxStyle { width: 430px; font-size: 0.7em }
+            .pageHeadStyle { background-color: rgb(183, 224, 252); padding: 30px }
             .duplicate { background: #fbb; }
-            #apiForm { margin-top: 20px; }
+            #apiForm { display: inline; }
             body { margin: 20px; }
             .displayed { display: inline; }
             .notDisplayed { display: none; }
             #warning { color: #f44; background: #ffb}
+            .formContainer { display: inline; border: 2px solid #999; padding: 40px; border-radius: 25px }
+            .restoreButton { display: inline; margin-left: 30px; }
         </style>
     </head>
 
