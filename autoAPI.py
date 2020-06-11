@@ -1,6 +1,7 @@
 import urllib.request, xmltodict, json, collections
 from collections import abc, OrderedDict
 from flask import Flask, render_template, Markup, request, jsonify, redirect, url_for
+from urllib.error import URLError, HTTPError
 import sqlite3
 
 app = Flask(__name__)
@@ -111,6 +112,9 @@ def generateOutput():
     url = request.query_string.decode('UTF-8')
     db = sqlite3.connect('autoAPI.db')
     cursor = db.cursor()
+    cursor.execute("select * from nodes where url = ?", (url, ))
+    btnDisabledStr = "disabled" if cursor.fetchone() is None else ""
+        
     cursor.execute("select variableURL from variableURLs where url = ?", (url, ))
     dbRow = cursor.fetchone()
     if dbRow is not None:
@@ -120,11 +124,12 @@ def generateOutput():
         variableURL = url
         parameterStyle = "none"
 
-    html = "<form style='display:inline' method='POST' action='/refresh?" + url + "'><input class='btn btn-primary' type='submit' name='refresh' value='Refresh'></form> &nbsp; &nbsp;"
-    html = html + "<form style='display:inline' method='POST' action='/api?" + url + "'><input class='btn btn-primary' type='submit' name='api' value='Call API'> &nbsp; &nbsp;"
+    html = "<div class='jumbotron'>"
+    html = html + "<h1 class='logo'>auto{API}</h1>"
+    html = html + "<form method='POST' action='/api?" + url + "'><input class='btn btn-primary " + btnDisabledStr + "' type='submit' name='api' value='Test API'> &nbsp; &nbsp;"
     html = html + "      <input type='checkbox' name='eliminateNullValues' value='yes'> Eliminate NULL Values &nbsp; &nbsp;"
     html = html + "      <input type='checkbox' name='collapseJSONResult' value='yes'> Collapse JSON Result &nbsp; &nbsp;"
-    html = html + "      <span style='display: " + parameterStyle + "'>Parameter value <input type='text' name='parameter' value=''></span></form> <hr>"
+    html = html + "      <span style='display: " + parameterStyle + "'>Parameter value <input type='text' name='parameter' value=''></span></form> </div>"
     html = html + "<form id='apiForm' method='POST' action='/?" + url + "'>" 
     html = html + "Parameterise: <input class='parameterBoxStyle' type=text name='parameter' value ='" + variableURL +"'>" 
     html = html + "<ul style='margin-top: 30px'>"
@@ -156,8 +161,9 @@ def generateOutput():
     # all nodes processed, so add submit button and close the form and outer list structure    
     for _ in range(currentLevel, 1, -1):
         html = html + "</ul>"
-    html = html + "<input type='submit' id='submit' class='displayed btn btn-primary' name='submit' value='Submit'></form>"
-    html = html + "<h4 id='warning' class='notDisplayed'>Repeated element names as highlighted.  Please resolve before continuing.</h4>"
+    html = html + "<input type='submit' id='submit' class='btn btn-primary displayed' name='submit' value='Submit'></form>"
+    html = html + "<form class='restoreButton' method='POST' action='/restore?" + url + "'><input class='btn btn-primary displayed' type='submit' id='restore' name='refresh' value='Restore'></form>"
+    html = html + "<h6 id='warning' class='notDisplayed'>Error - repeated element names as highlighted.  Please resolve before continuing.</h6>"
     cursor.close()
     db.close()
     return html
@@ -231,6 +237,8 @@ def flattenDictionary(dictionary):
             result[name] = []
             for element in collection:
                 result[name].append(flattenDictionary(element))
+            if len(result[name]) == 0:
+                del(result[name])
         else:
             result[name] = collection
 
@@ -249,55 +257,67 @@ def flattenDictionary(dictionary):
 def index():
     #url = 'http://apis.opendatani.gov.uk/translink/3042AA.xml'
     url = request.query_string.decode('UTF-8')
+    try:
+        response = urllib.request.urlopen(url) 
+    except HTTPError as e:
+        errorMessage = "HTTP Error " + str(e.code) + " for URL " + url 
+        return render_template("index.html", html=errorMessage) 
+    except URLError as e:
+        errorMessage = "URL Error: " + str(e.reason) + " for URL " + url 
+        return render_template("index.html", html=errorMessage) 
+    else:
+        # retrieve the XML from the source
+        response = urllib.request.urlopen(url) 
+        xmlData = response.read().decode("utf-8") # decode to convert bytes to string
+        # use xmltodict library to parse the XML to a Python dictionary
+        try:
+            jsonData = xmltodict.parse(xmlData)
+        except xmltodict.expat.ExpatError:
+            return jsonify( { "errorType" : "Data source does not contain valid XML", "URL" : url } )
+        else:
+            # parse JSON data and generate database table of nodes
+            # initial value pased is the root node of the structure
+            for key, value in jsonData.items():
+                parseChildren(1, key, value, "/")
 
-    # retrieve the XML from the source
-    response = urllib.request.urlopen(url) 
-    xmlData = response.read().decode("utf-8") # decode to convert bytes to string
-    # use xmltodict library to parse the XML to a Python dictionary
-    jsonData = xmltodict.parse(xmlData)
-    # parse JSON data and generate database table of nodes
-    # initial value pased is the root node of the structure
-    for key, value in jsonData.items():
-        parseChildren(1, key, value, "/")
+            # check for any optional fields by comparing the count with the maximum number of occurences
+            db = sqlite3.connect('autoAPI.db')
+            cursor = db.cursor()
+            cursor.execute("select distinct parent from nodes where url = ?", (url, )) # retrieve set of unique parent nodes
+            dbRows = cursor.fetchall()
+            for dbRow in dbRows: # for each parent (node path is in dbRow[0])
+                cursor2 = db.cursor()
+                # clear everPresent flag for nodes with fewer occurences than the maximum (i.e. those not present in all instances)
+                cursor2.execute("update nodes set everpresent = ? where parent = ? and count <  (select max(count) from nodes where parent = ? and url = ?)", 
+                                (0, dbRow[0], dbRow[0], url))
+                db.commit()
+                cursor2.close()
+            cursor.close()
+            db.close()
 
-    # check for any optional fields by comparing the count with the maximum number of occurences
-    db = sqlite3.connect('autoAPI.db')
-    cursor = db.cursor()
-    cursor.execute("select distinct parent from nodes where url = ?", (url, )) # retrieve set of unique parent nodes
-    dbRows = cursor.fetchall()
-    for dbRow in dbRows: # for each parent (node path is in dbRow[0])
-        cursor2 = db.cursor()
-        # clear everPresent flag for nodes with fewer occurences than the maximum (i.e. those not present in all instances)
-        cursor2.execute("update nodes set everpresent = ? where parent = ? and count <  (select max(count) from nodes where parent = ? and url = ?)", 
-                         (0, dbRow[0], dbRow[0], url))
-        db.commit()
-        cursor2.close()
-    cursor.close()
-    db.close()
+            # all nodes found so generate sequence codes
+            generateSequenceCodes()
 
-    # all nodes found so generate sequence codes
-    generateSequenceCodes()
-
-    # generate HTML code and pass to the output template
-    return render_template("index.html", html=Markup(generateOutput()))
+            # generate HTML code and pass to the output template
+            return render_template("index.html", html=Markup(generateOutput())) 
 
 
 ''' ------------------------ refresh() --------------------------
-    Service the GET /refresh request
+    Service the GET /restore request
     Delete current database contents and redirect to GET /
     -------------------------------------------------------------
 '''
-@app.route("/refresh", methods=["POST"])
-def refresh():
+@app.route("/restore", methods=["POST"])
+def restore():
     url = request.query_string.decode('UTF-8')
-    print("The URL is " + url)
     db = sqlite3.connect('autoAPI.db')
     cursor = db.cursor()
     cursor.execute("delete from nodes where url = ?", (url, ))
     db.commit()
+    cursor.execute("delete from variableURLs where url = ?", (url, ))
+    db.commit()
     cursor.close()    
-    print("About to redirect to /?" + url)
-    return redirect("/?" + url)  # loses querystring value
+    return redirect("/?" + url) 
 
 
 
@@ -316,14 +336,16 @@ def setValues():
     cursor.execute("update nodes set selected = ? where url = ?", (0, url) )
     db.commit()
 
-    if len(request.form.get('parameter')) > 0: # is there a variable URL specified?
-        cursor.execute("select * from variableURLs where url = ?", (url, ))
-        dbRow = cursor.fetchone()
-        if dbRow is None: # specify a new variable URL
-            cursor.execute("insert into variableURLs values (?, ?)", (url, request.form.get('parameter')))
-        else: # update an existing variable URL
-            cursor.execute("update variableURLs set variableURL = ? where url = ?", (request.form.get('parameter'), url))
-        db.commit()
+    variableURL = request.form.get('parameter')
+    if len(variableURL) > 0: # is there a variable URL specified?
+        if variableURL.find('<') > -1 and variableURL.find('>', variableURL.find('<') + 1) > -1:
+            cursor.execute("select * from variableURLs where url = ?", (url, ))
+            dbRow = cursor.fetchone()
+            if dbRow is None: # specify a new variable URL
+                cursor.execute("insert into variableURLs values (?, ?)", (url, request.form.get('parameter')))
+            else: # update an existing variable URL
+                cursor.execute("update variableURLs set variableURL = ? where url = ?", (request.form.get('parameter'), url))
+            db.commit()
     else: # delete any existing parameterisation
         cursor.execute("delete from variableURLs where url = ?", (url, ))
     
@@ -333,7 +355,7 @@ def setValues():
             cursor.execute("update nodes set selected = ? where sequenceCode = ? and url = ?", (1, key, url) )
             db.commit()
         
-        if key[:7] == "name_1.": # it the item one of the text fields
+        if key[:7] == "name_1.": # is the item one of the text fields?
             cursor.execute("select name from nodes where sequenceCode = ? and url = ?", (key[5:], url ))
             dbRow = cursor.fetchone()
             if value != dbRow[0]: # only update if it is a new name
@@ -361,42 +383,55 @@ def api():
     dbRow = cursor.fetchone()
     if dbRow is not None:
         variableURL = dbRow[0]
-        urlToOpen = variableURL[:variableURL.find('<')] + request.form.get('parameter') + variableURL[variableURL.find('>')+1:]
+        if len(request.form.get('parameter')) > 0: 
+            urlToOpen = variableURL[:variableURL.find('<')] + request.form.get('parameter') + variableURL[variableURL.find('>')+1:]
+        else:
+            return jsonify( { "errorType" : "No URL parameter provided", "URL" : url, "variableURL" : variableURL } )            
     else:
         urlToOpen = url
     print("Opening " + urlToOpen)
 
     collapse = True if request.form.get('collapseJSONResult') == 'yes' else False
     eliminateNulls = True if request.form.get('eliminateNullValues') == 'yes' else False
+
     # retrieve the XML from the source
-    response = urllib.request.urlopen(urlToOpen) 
-    xmlData = response.read().decode("utf-8") # decode to convert bytes to string
+    try:
+        response = urllib.request.urlopen(urlToOpen) 
+    except HTTPError as e:
+        return jsonify( { "errorType" : "HTTP Error", "code" : e.code, "reason": e.reason, "URL" : url } )
+    except URLError as e:
+        return jsonify( { "errorType" : "URL Error", "reason" : e.reason, "URL" : url } )
+    else:
+        xmlData = response.read().decode("utf-8") # decode to convert bytes to string
 
-    # use xmltodict library to parse the XML to a Python dictionary
-    jsonData = xmltodict.parse(xmlData)
+        # use xmltodict library to parse the XML to a Python dictionary
+        try:
+            jsonData = xmltodict.parse(xmlData)
+        except xmltodict.expat.ExpatError:
+            return jsonify( { "errorType" : "XML format error" } )
+        else:
+            # rename all nodes according to the 'name' field in the database
+            toBeChanged = {}
+            cursor.execute("select path, name from nodes where nameChanged = ? and url = ?", (1, url))
+            dbRows = cursor.fetchall()
+            for dbRow in dbRows:
+                toBeChanged[dbRow[0] + '/'] = dbRow[1]
+            updateDictionary(jsonData, '', toBeChanged, 'rename')
+            
+            #get the list of fields to remove and eliminate from the jsonData structure
+            cursor.execute("select name from nodes where leafNode = ? and selected = ? and url = ?", (1, 0, url) )
+            dbRows = cursor.fetchall()
+            cursor.close()
+            db.close()
+            nodesToRemove = []
+            for dbRow in dbRows:
+                nodesToRemove.append(dbRow[0])
+            updateDictionary(jsonData, '', nodesToRemove, 'delete')
 
-    # rename all nodes according to the 'name' field in the database
-    toBeChanged = {}
-    cursor.execute("select path, name from nodes where nameChanged = ? and url = ?", (1, url))
-    dbRows = cursor.fetchall()
-    for dbRow in dbRows:
-        toBeChanged[dbRow[0] + '/'] = dbRow[1]
-    updateDictionary(jsonData, '', toBeChanged, 'rename')
-    
-    #get the list of fields to remove and eliminate from the jsonData structure
-    cursor.execute("select name from nodes where leafNode = ? and selected = ? and url = ?", (1, 0, url) )
-    dbRows = cursor.fetchall()
-    cursor.close()
-    db.close()
-    nodesToRemove = []
-    for dbRow in dbRows:
-        nodesToRemove.append(dbRow[0])
-    updateDictionary(jsonData, '', nodesToRemove, 'delete')
-
-    jsonData = minimiseDictionary(jsonData, eliminateNulls)    # delete all unwanted leaf nodes
-    if collapse:
-        jsonData = flattenDictionary(jsonData) # flatten the structure as far as possible
-    return jsonify(jsonData)
+            jsonData = minimiseDictionary(jsonData, eliminateNulls)    # delete all unwanted leaf nodes
+            if collapse:
+                jsonData = flattenDictionary(jsonData) # flatten the structure as far as possible
+            return jsonify(jsonData)
 
 
 # run the Flask application
