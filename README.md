@@ -2,9 +2,7 @@
 ![Logo](http://adrianmoore.net/autoAPI/images/01TitleBar.png)
 Create and manipulate a custom API to an XML data set
 
-![Logo](http://adrianmoore.net/autoAPI/images/01TitleBar.png)
-
-![Logo](http://adrianmoore.net/autoAPI/images/02ShowClickableTree.png)
+<img src="http://adrianmoore.net/autoAPI/images/02ShowClickableTree.png" border="1">
 
 ![Logo](http://adrianmoore.net/autoAPI/images/03FullJSONResult.png)
 
