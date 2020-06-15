@@ -37,7 +37,7 @@ We can simplify the JSON returned by choosing the "Collapse JSON" option and re-
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/09CollapsedResult.png"></kbd>
 
-Where the URL contains a variable element that specifies the XML sourcec to be accessed, we can denote this by enclosing the variable part within &lt; and &lt; characters.  Here we specify that "3042AA" is a variable element for which we will supply the actual value to be used.  Click on the "Submit" button to record this in the database.
+Where the URL contains a variable element that specifies the XML sourcec to be accessed, we can denote this by enclosing the variable part within &lt; and &gt; characters.  Here we specify that "3042AA" is a variable element for which we will supply the actual value to be used.  Click on the "Submit" button to record this in the database.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/10Parameterise.png"></kbd>
 
@@ -53,10 +53,9 @@ The API is used programmatically by submitting a POST request to http://localhos
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/13Postman.png"></kbd>
 
-auto{API} can also remove null values from the resulting JSON data. Here, we specify that we want to retrieve auction data from the resource at http://aiweb.cs.washington.edu/research/projects/xmltk/xmldata/data/auctions/321gone.xml and specify the fields that we are interested in.
+**auto{API}** can also remove null values from the resulting JSON data. Here, we specify that we want to retrieve auction data from the resource at http://aiweb.cs.washington.edu/research/projects/xmltk/xmldata/data/auctions/321gone.xml and specify the fields that we are interested in.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/14Auction1.png"></kbd>
-
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/15Auction2.png"></kbd>
 
@@ -64,7 +63,7 @@ Now, when we save our selections and select "Test API", we see that some of the 
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/16Auction3.png"></kbd>
 
-Selecting the "Eliminate NULL Values" flag and re-clickong "Test API"...
+Selecting the "Eliminate NULL Values" flag and re-clicking "Test API"...
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/17Auction4.png"></kbd>
 
