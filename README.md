@@ -4,6 +4,8 @@ Create and manipulate a custom API to an XML data set
 
 ## How to use
 
+Run the Python application and access it in a web browser, passing the URL of the XML source as the querystring.  For example, with a local installation running on port 5000, the URL is http://localhost:5000/?URL.
+
 <kbd><img src="http://adrianmoore.net/autoAPI/images/02ShowClickableTree.png"></kbd>
 
 
