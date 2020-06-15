@@ -18,13 +18,15 @@ To filter the data we can select only the station name, the arrival and departur
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/04ChooseFields1.png"></kbd>
 
-... and the origin station and final destination for each service.  Now click on the <UPDATE> button to store these selections in the database.
+... and the origin station and final destination for each service.  We also choose to rename these fields as "ComingFrom" and "GoingTo" to provide more intuitive field names.  Now click on the <UPDATE> button to store these selections in the database.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/05ChooseFields2.png"></kbd>
 
+The details are stored, so we click "Test API" again...
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/06TestAPI.png"></kbd>
 
+... and only the fields selected are present in the JSON structure.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/07SelectedJSONResult.png"></kbd>
 
