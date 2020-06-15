@@ -18,7 +18,7 @@ To filter the data we can select only the station name, the arrival and departur
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/04ChooseFields1.png"></kbd>
 
-... and the origin station and final destination for each service.  We also choose to rename these fields as "ComingFrom" and "GoingTo" to provide more intuitive field names.  Now click on the <UPDATE> button to store these selections in the database.
+... and the origin station and final destination for each service.  We also choose to rename these fields as "ComingFrom" and "GoingTo" to provide more intuitive field names.  Now click on the "Submit" button to store these selections in the database.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/05ChooseFields2.png"></kbd>
 
@@ -30,6 +30,7 @@ The details are stored, so we click "Test API" again...
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/07SelectedJSONResult.png"></kbd>
 
+We can simplify the JSON returned by choosing the "Collapse JSON" option and re-clicking "Test API".  This removes elements of the structure that do not contain data and collapses the result to its simplest form.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/08SelectCollapseOption.png"></kbd>
 
