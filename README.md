@@ -26,7 +26,7 @@ The details are stored, so we click "Test API" again...
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/06TestAPI.png"></kbd>
 
-... and only the fields selected are present in the JSON structure.
+... and only the fields selected are present in the JSON structure. 
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/07SelectedJSONResult.png"></kbd>
 
