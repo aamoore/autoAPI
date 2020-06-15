@@ -4,10 +4,13 @@ Create and manipulate a custom API to an XML data set
 
 ## How to use
 
-Run the Python application and access it in a web browser, passing the URL of the XML source as the querystring.  For example, with a local installation running on port 5000, the URL is http://localhost:5000/?URL.
+Run the Python application and access it in a web browser, passing the URL of the XML source as the querystring.  For example, with a local installation running on port 5000, we request the XML data shown below by the URL http://localhost:5000/?http://apis.opendata.gov.uk/translink/3042AA.xml.
+
+The application reads the XML file from the source and displays it in a clickable node tree.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/02ShowClickableTree.png"></kbd>
 
+Clicking on the "Test API" button generates the JSON equivalent of the XML data.  By default, all fields are selected and the JSON structure matches that of ther original XML. 
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/03FullJSONResult.png"></kbd>
 
