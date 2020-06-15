@@ -49,10 +49,11 @@ Now the data returned is that for a different station as previously.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/12DifferentResult.png"></kbd>
 
-The API is used programmatically by submitting a POST request to http://localhost:5000/api/?url, where url is the address from where the XML is to be retrieved.  POST variables for ,  and  are provided as required.
+The API is used programmatically by submitting a POST request to http://localhost:5000/api/?url, where **url** is the address from where the XML is to be retrieved.  POST variables for **collapseJSONResult**, **eliminateNullValues** and **parameter**  are provided as required.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/13Postman.png"></kbd>
 
+auto{API} can also remove null values from the resulting JSON data.  
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/14Auction1.png"></kbd>
 
