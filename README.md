@@ -14,9 +14,11 @@ Clicking on the "Test API" button generates the JSON equivalent of the XML data.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/03FullJSONResult.png"></kbd>
 
+To filter the data we can select only the station name, the arrival and departure times for each service...
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/04ChooseFields1.png"></kbd>
 
+... and the origin station and final destination for each service.  Now click on the <UPDATE> button to store these selections in the database.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/05ChooseFields2.png"></kbd>
 
