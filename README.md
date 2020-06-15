@@ -37,12 +37,15 @@ We can simplify the JSON returned by choosing the "Collapse JSON" option and re-
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/09CollapsedResult.png"></kbd>
 
+Where the URL contains a variable element that specifies the XML sourcec to be accessed, we can denote this by enclosing the variable part within &lt; and &lt; characters.  Here we specify that 3042AA is a variable element for which we will supply the actual value to be used.  Click on the "Submit" button to record this in the database.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/10Parameterise.png"></kbd>
 
+Now, an extra "Parameter" field is required, in which we provide the value to be substituted into the URL.
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/11SetParameter.png"></kbd>
 
+Now, the data set returned is that from the 
 
 <kbd><img src="http://adrianmoore.net/autoAPI/images/12DifferentResult.png"></kbd>
 
