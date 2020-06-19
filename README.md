@@ -2,7 +2,7 @@
 <kbd><img src="http://adrianmoore.net/autoAPI/images/01TitleBar.png"></kbd>
 Create and manipulate a custom API to an XML data set
 
-Running version available at http://autoapi-app.herokuapp.com
+Running version available at <a href="http://autoapi-app.herokuapp.com?http://apis.opendatani.gov.uk/translink/3042AA.xml">Heroku</a>
 
 ## How to use
 
